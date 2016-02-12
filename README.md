@@ -3,20 +3,24 @@ parse a URI to its scheme parts.
 
 Syntax:
 
-   uri-parse [selector ...] <uri> ...
+   uri-parser [selector ...] <uri> ...
 
 Example:
 
-  $ uri-parser "http://www.example.com:80"
-  scheme: http
-  authority: www.example.com:80
-  host: www.example.com
-  port: 80
+    $ uri-parser "http://www.example.com:80/a/b/c"
+    scheme: http
+    authority: www.example.com:80
+    hostinfo: www:example.com:80
+    host: www.example.com
+    port: 80
+    path: /a/b/c
+    dirname: /a/b
+    basename: c
 
 Example with a selector:
 
-  $ uri-parser --host "http://www.example.com"
-  www.example.com
+    $ uri-parser --host "http://www.example.com/a/b/c"
+    www.example.com
 
 ## Options ##
 
@@ -67,10 +71,3 @@ Example of scheme parts:
 
 Caution: this current implementation is sufficient for our internal needs;
 it is generally accurate for typical URIs, but is not standards-compliant.
-
-Command: uri-parser
-Version: 3.0.0
-Created: 2015-05-31
-Updated: 2016-02-12
-License: GPL
-Contact: Joel Parker Henderson (joel@joelparkerhenderson.com)
