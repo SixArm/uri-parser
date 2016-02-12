@@ -40,7 +40,6 @@ Output options:
 
   * \`--uri\`: the entire URI
   * \`--scheme\`: the scheme part, such as "http"
-  * \`--hierarchical\`: the hierarchical part
   * \`--authority\`: the authority part, such as "alice:secret@www.example.com:80"
   * \`--userinfo\`: the username and password, such as "alice:secret"
   * \`--username\`: the username, such as "alice"
@@ -53,29 +52,38 @@ Output options:
   * \`--basename\`: the path base name, such as "index.html"
   * \`--query\`: the query part, such as "key=val"
   * \`--fragment\`: the fragment part, such as "123"
+  * \`--hierarchy\`: the hierarchical part, which is the authority and path
+  * \`--holarchy\`: the non-hierarchical part, which is the query and fragment
 
+## URI Scheme Details ##
 
-## Scheme Details ##
+Every URI is made of parts. The parts are described in the URI RFC specification, and there is a summary at http://en.wikipedia.org/wiki/URI_scheme
 
-See http://en.wikipedia.org/wiki/URI_scheme
+Example:
 
-Example of scheme parts:
+    http://www.example.com/index.html
+    └─┬─┘  └──────┬──────┘ └───┬────┘
+    scheme       host         path
 
-  * uri: "http://alice:secret@www.example.com:80/a/b/c.html?d=e&f=g#hi"
-  * scheme: "http"
-  * hierarchical: "//alice:secret@www.example.com:80/a/b/c?d#e"
-  * authority: "alice:secret@www.example.com:80"
-    * userinfo: "alice:secret"
-      * username: "alice"
-      * password: "secret"
-    * hostinfo: "www.example.com:80"
-      * host: "www.example.com"
-      * port: "80"
-  * path: "/a/b/c"
-    * dirname: "/a/b"
-    * basename: "c"
-  * query: "d"
-  * fragment: "e"
+Example with more parts:
+
+    http://elizabeth:opensesame@www.example.com:10000/aa/bb/cc/index.html?key=val#identifier
+    └─┬─┘  └───┬───┘ └───┬────┘ └──────┬──────┘└─┬──┘└─────────┬────────┘ └──┬──┘ └───┬────┘
+    scheme  username  password        host      port          path          query   fragment
+           └─────────┬────────┘ └─────────┬─────────┘└──────────────────┬──────────────────┘
+                  userinfo             hostinfo                      pathinfo
+           └───────────────────┬────────────────────┘
+                           authority
+           └───────────────────────────────┬────────────────────────────┘ └───────┬────────┘
+                                        hierarchy                              holarchy
+
+The path part may have a directory name and a base name:
+
+    http://www.example.com/aa/bb/cc/index.html
+                          └───┬───┘ └───┬────┘
+                            dirname  basename
+                          └─────────┬────────┘
+                                   path
 
 ## Caution ##
 
