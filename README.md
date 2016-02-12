@@ -1,5 +1,4 @@
-uri-parser:
-parse a URI to its scheme parts.
+# uri-parser:<br>parse a URI to its scheme parts
 
 Syntax:
 
