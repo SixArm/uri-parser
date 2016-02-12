@@ -31,11 +31,11 @@ Output options:
   * `--hostinfo`: the host and port, such as "www.example.com:80"
   * `--host`: the host, such as "www.example.com"
   * `--port`: the port, such as "80"
-  * `--path`: the path part, such as "/a/b/c/index.html"
-  * `--dirname`: the path directories, such as "/a/b/c"
-  * `--basename`: the path basename, such as "index.html"
-  * `--query`: the query part, such as "a=b&c=d&e=f"
-  * `--fragment`: the fragment part, such as "123"Output options:
+  * `--path`: the path part, such as "/a/b/c/index.html?key=val#123"
+  * `--dirname`: the path directory name, such as "/a/b/c"
+  * `--basename`: the path base name, such as "index.html"
+  * `--query`: the query part, such as "key=val"
+  * `--fragment`: the fragment part, such as "123"
 
 ## Scheme Details ##
 
