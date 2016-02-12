@@ -15,53 +15,44 @@ program_variant="$program_command version $program_version updated $program_upda
 help(){
 cat << END
 uri-parser:
-parse a URI to its scheme parts.
+parse a URI to its parts.
 
 Syntax:
 
     uri-parser [options] <uri> ...
 
-Example:
+Examples:
 
-    $ uri-parser "http://www.example.com:80/a/b/c"
-    scheme: http
-    authority: www.example.com:80
-    hostinfo: www.example.com:80
-    host: www.example.com
-    port: 80
-    path: /a/b/c
-    dirname: /a/b
-    basename: c
+    $ uri-parser --host http://example.com/index.html
+    example.com
 
-Example with a selector:
-
-    $ uri-parser --host "http://www.example.com"
-    www.example.com
+    $ uri-parser --path http://example.com/index.html
+    /index.html
 
 ## Options ##
 
 General options:
 
-  * \`-h\`, \`--help\`, \`-?\`: show help message
+  * \`-h\`, \`--help\`: show help message
   * \`-V\`, \`--version\`: show version message
 
-Parse options:
+Output options:
 
-  * \`--uri\`
-  * \`--scheme\`
-  * \`--hierarchical\`
-  * \`--authority\`
-  * \`--userinfo\`
-  * \`--username\`
-  * \`--password\`
-  * \`--hostinfo\`
-  * \`--host\`
-  * \`--port\`
-  * \`--path\`
-  * \`--dirname\`
-  * \`--basename\`
-  * \`--query\`
-  * \`--fragment\`
+  * \`--uri\`: the entire URI
+  * \`--scheme\`: the scheme part, such as "http"
+  * \`--hierarchical\`: the hierarchical part
+  * \`--authority\`: the authority part, such as "alice:secret@www.example.com:80"
+  * \`--userinfo\`: the username and password, such as "alice:secret"
+  * \`--username\`: the username, such as "alice"
+  * \`--password\`: the password, such as "secret"
+  * \`--hostinfo\`: the host and port, such as "www.example.com:80"
+  * \`--host\`: the host, such as "www.example.com"
+  * \`--port\`: the port, such as "80"
+  * \`--path\`: the path part, such as "/a/b/c/index.html"
+  * \`--dirname\`: the path directories, such as "/a/b/c"
+  * \`--basename\`: the path basename, such as "index.html"
+  * \`--query\`: the query part, such as "a=b&c=d&e=f"
+  * \`--fragment\`: the fragment part, such as "123"
 
 ## Scheme Details ##
 
@@ -85,8 +76,13 @@ Example of scheme parts:
   * query: "d"
   * fragment: "e"
 
-Caution: this current implementation is sufficient for our internal needs;
-it is generally accurate for typical URIs, but is not standards-compliant.
+## Caution ##
+
+This software is currently alpha quality.
+
+It is suitable for a first look by developers so we can feedback and make improvements.
+
+Do not use this current version for production systems.
 
 Command: $program_command
 Version: $program_version
@@ -118,7 +114,7 @@ while [ $# -gt 0 ]; do
             shift
             break
             ;;
-        -h | --help | -\? )
+        -h | --help )
             help
             exit 0
             ;;
