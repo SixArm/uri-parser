@@ -1,0 +1,261 @@
+#!/bin/sh
+
+## Program Tracking ##
+
+program_command="uri-parser"
+program_version="3.0.0"
+program_created="2015-05-31"
+program_updated="2016-02-12"
+program_license="GPL"
+program_contact="Joel Parker Henderson (joel@joelparkerhenderson.com)"
+program_variant="$program_command version $program_version updated $program_updated"
+
+## Help Function ##
+
+help(){
+cat << END
+uri-parser:
+parse a URI to its scheme parts.
+
+Syntax:
+
+   uri-parser [selector ...] <uri> ...
+
+Example:
+
+  $ uri-parser "http://www.example.com:80"
+  scheme: http
+  authority: www.example.com:80
+  host: www.example.com
+  port: 80
+
+Example with a selector:
+
+  $ uri-parser --host "http://www.example.com"
+  www.example.com
+
+## Options ##
+
+General options:
+
+  * \`-h\`, \`--help\`, \`-?\`: show help message
+  * \`-V\`, \`--version\`: show version message
+
+Parse options:
+
+  * \`--uri\`
+  * \`--scheme\`
+  * \`--hierarchical\`
+  * \`--authority\`
+  * \`--userinfo\`
+  * \`--username\`
+  * \`--password\`
+  * \`--hostinfo\`
+  * \`--host\`
+  * \`--port\`
+  * \`--path\`
+  * \`--dirname\`
+  * \`--basename\`
+  * \`--query\`
+  * \`--fragment\`
+
+## Scheme Details ##
+
+See http://en.wikipedia.org/wiki/URI_scheme
+
+Example of scheme parts:
+
+  * uri: "http://alice:secret@www.example.com:80/a/b/c.html?d=e&f=g#hi"
+  * scheme: "http"
+  * hierarchical: "//alice:secret@www.example.com:80/a/b/c?d#e"
+  * authority: "alice:secret@www.example.com:80"
+    * userinfo: "alice:secret"
+      * username: "alice"
+      * password: "secret"
+    * hostinfo: "www.example.com:80"
+      * host: "www.example.com"
+      * port: "80"
+  * path: "/a/b/c"
+    * dirname: "/a/b"
+    * basename: "c"
+  * query: "d"
+  * fragment: "e"
+
+Caution: this current implementation is sufficient for our internal needs;
+it is generally accurate for typical URIs, but is not standards-compliant.
+
+Command: $program_command
+Version: $program_version
+Created: $program_created
+Updated: $program_updated
+License: $program_license
+Contact: $program_contact
+END
+}
+
+## Essential Functions ##
+
+out () { printf %s\\n "$*" ; }
+err () { >&2 printf %s\\n "$*" ; }
+die () { >&2 printf %s\\n "$*" ; exit 1 ; }
+die_opt_unk() { die "Option $1 is unknown" ; }
+die_opt_arg() { die "Option $1 needs an argument" ; }
+
+## Defaults ##
+
+parts=""
+fs=${FS:- }
+
+## Options ##
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        -- )
+            shift
+            break
+            ;;
+        -h | --help | -\? )
+            help
+            exit 0
+            ;;
+        -V | --version )
+            out $program_variant
+            exit 0
+            ;;
+        --uri | \
+        --scheme | \
+        --hierarchical | \
+        --authority | \
+        --userinfo | \
+        --username | \
+        --password | \
+        --host | \
+        --port | \
+        --path | \
+        --dirname | \
+        --basename | \
+        --query | \
+        --fragment )
+            parts="$parts ${1#--}"
+            ;;
+        -?*)
+            die_opt_unk $1
+            ;;
+        *)
+            break
+    esac
+    shift
+done
+
+[ $# -eq 0 ] && help && exit 0
+
+## Main ##
+
+for uri in "$@"; do
+
+  ## Clear ##
+
+  name=""
+  hierarchical=""
+  query=""
+  fragment=""
+  authority=""
+  userinfo=""
+  hostinfo=""
+  username=""
+  password=""
+  host=""
+  port=""
+  path=""
+  dirname=""
+  basename=""
+  query=""
+  fragment=""
+  file=""
+
+  ## Parse the URI to its parts ##
+
+  scheme=${uri%%:*}; s=${uri#*:}
+
+  if [[ $s = "//"* ]]; then
+      s=${s#//}
+      authority=${s%%/*}
+      path_query_fragment=${s:${#authority}}
+      if [ -n "${authority:-}" ]; then
+          if [[ $authority == *@* ]]; then
+              userinfo=${authority%@*}
+              hostinfo=${authority##*@}
+          else
+              userinfo=""
+              hostinfo="$authority"
+          fi
+          if [ -n "$userinfo" ]; then
+              username=${userinfo%%:*}
+              password=${userinfo#*:}
+          fi
+          if [ -n "$hostinfo" ]; then
+              host=${hostinfo%:*}
+              if [[ $hostinfo == *:* ]]; then
+                  port=${hostinfo##*:}
+              fi
+          fi
+      fi
+      if [ -n "${path_query_fragment:-}" ]; then
+          path=${path_query_fragment}
+          path=${path%%\?*}
+          path=${path%%#*}
+          dirname=$(dirname "$path")
+          basename=$(basename "$path")
+          if [[ $path_query_fragment == *?* ]]; then
+              query=${path_query_fragment##*\?}
+              query=${query%%#*}
+          fi
+          if [[ $path_query_fragment == *#* ]]; then
+              fragment=${path_query_fragment##*\#}
+          fi
+      fi
+  else
+      path=$s
+  fi
+
+  if [ -z "$parts" ];  then
+      [ -z "$uri" ]          || out "uri:$uri"
+      [ -z "$scheme" ]       || out "scheme:$scheme"
+      [ -z "$authority" ]    || out "authority:$authority"
+      [ -z "$hierarchical" ] || out "hierarchical:$hierarchical"
+      [ -z "$userinfo" ]     || out "userinfo:$userinfo"
+      [ -z "$hostinfo" ]     || out "hostinfo:$hostinfo"
+      [ -z "$username" ]     || out "username:$username"
+      [ -z "$password" ]     || out "password:$password"
+      [ -z "$host" ]         || out "host:$host"
+      [ -z "$port" ]         || out "port:$port"
+      [ -z "$path" ]         || out "path:$path"
+      [ -z "$dirname" ]      || out "dirname:$dirname"
+      [ -z "$basename" ]     || out "basename:$basename"
+      [ -z "$query" ]        || out "query:$query"
+      [ -z "$fragment" ]     || out "fragment:$fragment"
+  else
+      s=""
+      for part in $parts; do
+          case $part in
+              uri )          s="$s$fs$uri" ;;
+              scheme )       s="$s$fs$scheme" ;;
+              authority )    s="$s$fs$authority" ;;
+              hierarchical ) s="$s$fs$hierarchical" ;;
+              userinfo )     s="$s$fs$userinfo" ;;
+              hostinfo )     s="$s$fs$hostinfo" ;;
+              username )     s="$s$fs$username" ;;
+              password )     s="$s$fs$password" ;;
+              host )         s="$s$fs$host" ;;
+              port )         s="$s$fs$port" ;;
+              path )         s="$s$fs$path" ;;
+              dirname )      s="$s$fs$dirname" ;;
+              basename )     s="$s$fs$basename" ;;
+              query )        s="$s$fs$query" ;;
+              fragment )     s="$s$fs$fragment" ;;
+          esac
+      done
+      s=${s#$fs}
+      out "$s"
+  fi
+done
