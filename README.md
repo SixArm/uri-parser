@@ -3,7 +3,7 @@ parse a URI to its scheme parts.
 
 Syntax:
 
-    uri-parser [options] \<uri\> ...
+    uri-parser [options] <uri> ...
 
 Example:
 
