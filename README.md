@@ -21,21 +21,21 @@ General options:
 
 Output options:
 
-  * \`--uri\`: the entire URI
-  * \`--scheme\`: the scheme part, such as "http"
-  * \`--hierarchical\`: the hierarchical part
-  * \`--authority\`: the authority part, such as "alice:secret@www.example.com:80"
-  * \`--userinfo\`: the username and password, such as "alice:secret"
-  * \`--username\`: the username, such as "alice"
-  * \`--password\`: the password, such as "secret"
-  * \`--hostinfo\`: the host and port, such as "www.example.com:80"
-  * \`--host\`: the host, such as "www.example.com"
-  * \`--port\`: the port, such as "80"
-  * \`--path\`: the path part, such as "/a/b/c/index.html"
-  * \`--dirname\`: the path directories, such as "/a/b/c"
-  * \`--basename\`: the path basename, such as "index.html"
-  * \`--query\`: the query part, such as "a=b&c=d&e=f"
-  * \`--fragment\`: the fragment part, such as "123"Output options:
+  * `--uri`: the entire URI
+  * `--scheme`: the scheme part, such as "http"
+  * `--hierarchical`: the hierarchical part
+  * `--authority`: the authority part, such as "alice:secret@www.example.com:80"
+  * `--userinfo`: the username and password, such as "alice:secret"
+  * `--username`: the username, such as "alice"
+  * `--password`: the password, such as "secret"
+  * `--hostinfo`: the host and port, such as "www.example.com:80"
+  * `--host`: the host, such as "www.example.com"
+  * `--port`: the port, such as "80"
+  * `--path`: the path part, such as "/a/b/c/index.html"
+  * `--dirname`: the path directories, such as "/a/b/c"
+  * `--basename`: the path basename, such as "index.html"
+  * `--query`: the query part, such as "a=b&c=d&e=f"
+  * `--fragment`: the fragment part, such as "123"Output options:
 
 ## Scheme Details ##
 
