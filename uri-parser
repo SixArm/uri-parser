@@ -138,13 +138,16 @@ while [ $# -gt 0 ]; do
         --userinfo | \
         --username | \
         --password | \
+        --hostinfo | \
         --host | \
         --port | \
         --path | \
         --dirname | \
         --basename | \
         --query | \
-        --fragment )
+        --fragment | \
+        --hierarchy | \
+        --holarchy )
             parts="$parts ${1#--}"
             ;;
         -?*)
@@ -165,9 +168,8 @@ for uri in "$@"; do
   ## Clear ##
 
   name=""
-  hierarchical=""
-  query=""
-  fragment=""
+  hierarchy=""
+  holarchy=""
   authority=""
   userinfo=""
   hostinfo=""
@@ -218,10 +220,18 @@ for uri in "$@"; do
           if [[ $path_query_fragment == *?* ]]; then
               query=${path_query_fragment##*\?}
               query=${query%%#*}
+              holarchy=${path_query_fragment##*\?}
           fi
           if [[ $path_query_fragment == *#* ]]; then
               fragment=${path_query_fragment##*\#}
+              holarchy=${path_query_fragment##*\#}
           fi
+      fi
+      if [[ -n $authority ]]; then
+          hierarchy="$authority"
+      fi
+      if [[ -n $path ]]; then
+          hierarchy="$hierarchy/$path"
       fi
   else
       path=$s

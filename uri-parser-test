@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# uri-parser-test
+#
+##
+
+## Assert ##
+
+assert_eq() {
+    expect="$1"; actual="$2"; msg="$3"
+    expect_pretty=${expect//$'\n'/␞}; expect_pretty=${expect_pretty//$'\t'/␟};
+    actual_pretty=${actual//$'\n'/␞}; actual_pretty=${actual_pretty//$'\t'/␟}
+    if [ "$expect" == "$actual" ]; then
+        echo "assert_eq $msg expect:$expect_pretty actual:$actual_pretty: SUCCESS"
+    else
+        echo "assert_eq $msg expect:$expect_pretty actual:$actual_pretty: FAILURE"
+    fi
+}
+
+## Main ##
+
+cmd=${CMD:-uri-parser}
+uri="http://alice:secret@www.example.com/aa/bb/cc?key=val#frag"
+
+x=$($cmd --scheme "$uri") &&
+    assert_eq "http" "$x" "scheme"
+
+x=$($cmd --userinfo "$uri") &&
+    assert_eq "alice:secret" "$x" "userinfo"
+
+x=$($cmd --username "$uri") &&
+    assert_eq "alice" "$x" "username"
+
+x=$($cmd --password "$uri") &&
+    assert_eq "secret" "$x" "password"
+
+x=$($cmd --hostinfo "$uri") &&
+    assert_eq "www.example.com:80" "$x" "hostinfo"
+
+x=$($cmd --host "$uri") &&
+    assert_eq "www.example.com" "$x" "host"
+
+x=$($cmd --port "$uri") &&
+    assert_eq "80" "$x" "port"
+
+x=$($cmd --path "$uri") &&
+    assert_eq "/aa/bb/cc" "$x" "path"
+
+x=$($cmd --dirname "$uri") &&
+    assert_eq "/aa/bb" "$x" "dirname"
+
+x=$($cmd --basename "$uri") &&
+    assert_eq "cc" "$x" "basename"
+
+x=$($cmd --query "$uri") &&
+    assert_eq "key=val" "$x" "query"
+
+x=$($cmd --fragment "$uri") &&
+    assert_eq "frag" "$x" "fragment"
+
+x=$($cmd --hierarchy "$uri") &&
+    assert_eq "alice:secret@www.example.com/aa/bb/cc" "$x" "hierarchy"
+
+x=$($cmd --holarchy "$uri") &&
+    assert_eq "key=val#frag" "$x" "holarchy"
