@@ -20,7 +20,7 @@ assert_eq() {
 ## Main ##
 
 cmd=${CMD:-uri-parser}
-uri="http://alice:secret@www.example.com/aa/bb/cc?key=val#frag"
+uri="http://alice:secret@www.example.com:80/aa/bb/cc?key=val#frag"
 
 x=$($cmd --scheme "$uri") &&
     assert_eq "http" "$x" "scheme"
@@ -59,7 +59,7 @@ x=$($cmd --fragment "$uri") &&
     assert_eq "frag" "$x" "fragment"
 
 x=$($cmd --hierarchy "$uri") &&
-    assert_eq "alice:secret@www.example.com/aa/bb/cc" "$x" "hierarchy"
+    assert_eq "alice:secret@www.example.com:80/aa/bb/cc" "$x" "hierarchy"
 
 x=$($cmd --holarchy "$uri") &&
     assert_eq "key=val#frag" "$x" "holarchy"

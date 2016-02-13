@@ -182,7 +182,6 @@ for uri in "$@"; do
   basename=""
   query=""
   fragment=""
-  file=""
 
   ## Parse the URI to its parts ##
 
@@ -193,6 +192,7 @@ for uri in "$@"; do
       authority=${s%%/*}
       path_query_fragment=${s:${#authority}}
       if [ -n "${authority:-}" ]; then
+          hierarchy="$authority"
           if [[ $authority == *@* ]]; then
               userinfo=${authority%@*}
               hostinfo=${authority##*@}
@@ -215,23 +215,18 @@ for uri in "$@"; do
           path=${path_query_fragment}
           path=${path%%\?*}
           path=${path%%#*}
+          hierarchy="$hierarchy$path"
           dirname=$(dirname "$path")
           basename=$(basename "$path")
           if [[ $path_query_fragment == *?* ]]; then
               query=${path_query_fragment##*\?}
               query=${query%%#*}
-              holarchy=${path_query_fragment##*\?}
+              holarchy="$query"
           fi
           if [[ $path_query_fragment == *#* ]]; then
               fragment=${path_query_fragment##*\#}
-              holarchy=${path_query_fragment##*\#}
+              holarchy="$holarchy#$fragment"
           fi
-      fi
-      if [[ -n $authority ]]; then
-          hierarchy="$authority"
-      fi
-      if [[ -n $path ]]; then
-          hierarchy="$hierarchy/$path"
       fi
   else
       path=$s
@@ -241,7 +236,6 @@ for uri in "$@"; do
       [ -z "$uri" ]          || out "uri:$uri"
       [ -z "$scheme" ]       || out "scheme:$scheme"
       [ -z "$authority" ]    || out "authority:$authority"
-      [ -z "$hierarchical" ] || out "hierarchical:$hierarchical"
       [ -z "$userinfo" ]     || out "userinfo:$userinfo"
       [ -z "$hostinfo" ]     || out "hostinfo:$hostinfo"
       [ -z "$username" ]     || out "username:$username"
@@ -253,6 +247,8 @@ for uri in "$@"; do
       [ -z "$basename" ]     || out "basename:$basename"
       [ -z "$query" ]        || out "query:$query"
       [ -z "$fragment" ]     || out "fragment:$fragment"
+      [ -z "$hierarchy" ]    || out "hierarchy:$hierarchy"
+      [ -z "$holarchy" ]     || out "holarchy:$holarchy"
   else
       s=""
       for part in $parts; do
@@ -260,7 +256,6 @@ for uri in "$@"; do
               uri )          s="$s$fs$uri" ;;
               scheme )       s="$s$fs$scheme" ;;
               authority )    s="$s$fs$authority" ;;
-              hierarchical ) s="$s$fs$hierarchical" ;;
               userinfo )     s="$s$fs$userinfo" ;;
               hostinfo )     s="$s$fs$hostinfo" ;;
               username )     s="$s$fs$username" ;;
@@ -272,6 +267,8 @@ for uri in "$@"; do
               basename )     s="$s$fs$basename" ;;
               query )        s="$s$fs$query" ;;
               fragment )     s="$s$fs$fragment" ;;
+              hierarchy )    s="$s$fs$hierarchy" ;;
+              holarchy )     s="$s$fs$holarchy" ;;
           esac
       done
       s=${s#$fs}
