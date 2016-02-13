@@ -20,10 +20,14 @@ assert_eq() {
 ## Main ##
 
 cmd=${CMD:-uri-parser}
+
 uri="http://alice:secret@www.example.com:80/aa/bb/cc?key=val#frag"
 
 x=$($cmd --scheme "$uri") &&
     assert_eq "http" "$x" "scheme"
+
+x=$($cmd --authority "$uri") &&
+    assert_eq "alice:secret@www.example.com:80" "$x" "authority"
 
 x=$($cmd --userinfo "$uri") &&
     assert_eq "alice:secret" "$x" "userinfo"
@@ -63,3 +67,29 @@ x=$($cmd --hierarchy "$uri") &&
 
 x=$($cmd --holarchy "$uri") &&
     assert_eq "key=val#frag" "$x" "holarchy"
+
+## URI with a host, no userinfo, no path, etc. ##
+
+uri="http://www.example.com"
+
+x=$($cmd --host "$uri") &&
+    assert_eq "www.example.com" "$x" "host"
+
+x=$($cmd --hostinfo "$uri") &&
+    assert_eq "www.example.com" "$x" "hostinfo"
+
+x=$($cmd --authority "$uri") &&
+    assert_eq "www.example.com" "$x" "authority"
+
+## URI with a path basename, no dirname, no query, no fragment, etc. ##
+
+uri="http://www.example.com/index.html"
+
+x=$($cmd --path "$uri") &&
+    assert_eq "/index.html" "$x" "path"
+
+x=$($cmd --dirname "$uri") &&
+    assert_eq "/" "$x" "dirname"
+
+x=$($cmd --basename "$uri") &&
+    assert_eq "index.html" "$x" "basename"
