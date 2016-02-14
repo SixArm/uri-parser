@@ -3,7 +3,7 @@
 ## Program Tracking ##
 
 program_command="uri-parser"
-program_version="3.3.0"
+program_version="3.4.0"
 program_created="2015-05-31"
 program_updated="2016-02-13"
 program_license="GPL"
@@ -55,6 +55,7 @@ Output options:
   * \`--fragment\`, \`--anchor\`: the fragment a.k.a. anchor, such as an id.
   * \`--hierarchy\`: the hierarchical part, which is the authority and path
   * \`--holarchy\`: the non-hierarchical part, which is the query and fragment
+  * \`--connection\`: the connection URI, "http://alice:secret@www.example.com:80"
   * \`--favicon\`: the probable favicon URL, such as "http://www.example.com/favicon.ico"
 
 ## URI Scheme Details ##
@@ -91,22 +92,20 @@ The path part may have a directory name and a base name:
                           └─────────┬────────┘
                                    path
 
+The path part may have a directory name and a base name:
+
+    http://www.example.com/aa/bb/cc/index.html
+    └─────────┬──────────┘
+          connection
+
 Synonyms:
 
   * scheme, protocol
-  * fragment, anchor
+  * fragment, fragment id, anchor, anchor name
 
-## Extras ##
+The \`--favicon\` option transforms the URL by using the connection part then appending the typical file name \`favicon.ico\`:
 
-* T
-
-## Caution ##
-
-This software is currently alpha quality.
-
-It is suitable for a first look by developers so we can feedback and make improvements.
-
-Do not use this current version for production systems.
+    http://www.example.com/favicon.ico
 
 Command: $program_command
 Version: $program_version
@@ -166,6 +165,7 @@ while [ $# -gt 0 ]; do
         --anchor | \
         --hierarchy | \
         --holarchy | \
+        --connection | \
         --favicon )
             parts="$parts ${1#--}"
             ;;
@@ -202,6 +202,7 @@ for uri in "$@"; do
   fragment=""
   hierarchy=""
   holarchy=""
+  connection=""
   favicon=""
 
   ## Parse the URI to its parts ##
@@ -234,7 +235,8 @@ for uri in "$@"; do
                   port=${hostinfo##*:}
               fi
           fi
-          favicon="$scheme://$authority/favicon.ico"
+          connection="$scheme://$authority"
+          favicon="$connection/favicon.ico"
       fi
       if [ -n "${path_query_fragment:-}" ]; then
           path=${path_query_fragment}
@@ -275,6 +277,7 @@ for uri in "$@"; do
       [ -z "$fragment" ]     || out "fragment:$fragment"
       [ -z "$hierarchy" ]    || out "hierarchy:$hierarchy"
       [ -z "$holarchy" ]     || out "holarchy:$holarchy"
+      [ -z "$connection" ]   || out "connection:$connection"
       [ -z "$favicon" ]      || out "favicon:$favicon"
   else
       s=""
@@ -299,6 +302,7 @@ for uri in "$@"; do
               anchor )       s="$s$fs$fragment" ;;
               hierarchy )    s="$s$fs$hierarchy" ;;
               holarchy )     s="$s$fs$holarchy" ;;
+              connection )   s="$s$fs$connection" ;;
               favicon )      s="$s$fs$favicon" ;;
           esac
       done

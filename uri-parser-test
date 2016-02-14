@@ -77,6 +77,9 @@ x=$($cmd --hierarchy "$uri") &&
 x=$($cmd --holarchy "$uri") &&
     assert_eq "key=val#frag" "$x" "holarchy"
 
+x=$($cmd --connection "$uri") &&
+    assert_eq "http://alice:secret@www.example.com:80" "$x" "favicon"
+
 x=$($cmd --favicon "$uri") &&
     assert_eq "http://alice:secret@www.example.com:80/favicon.ico" "$x" "favicon"
 
@@ -92,6 +95,9 @@ x=$($cmd --hostinfo "$uri") &&
 
 x=$($cmd --authority "$uri") &&
     assert_eq "www.example.com" "$x" "authority"
+
+x=$($cmd --connection "$uri") &&
+    assert_eq "http://www.example.com" "$x" "connection"
 
 x=$($cmd --favicon "$uri") &&
     assert_eq "http://www.example.com/favicon.ico" "$x" "favicon"
