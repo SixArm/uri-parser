@@ -71,6 +71,12 @@ x=$($cmd --fragment "$uri") &&
 x=$($cmd --anchor "$uri") &&
     assert_eq "frag" "$x" "anchor"
 
+x=$($cmd --defragment "$uri") &&
+    assert_eq "http://alice:secret@www.example.com:80/aa/bb/cc?key=val" "$x" "defragment"
+
+x=$($cmd --unanchor "$uri") &&
+    assert_eq "http://alice:secret@www.example.com:80/aa/bb/cc?key=val" "$x" "unanchor"
+
 x=$($cmd --hierarchy "$uri") &&
     assert_eq "alice:secret@www.example.com:80/aa/bb/cc" "$x" "hierarchy"
 

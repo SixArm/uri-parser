@@ -46,16 +46,17 @@ Output options:
   * \`--password\`: the password, such as "secret"
   * \`--hostinfo\`: the host and port, such as "www.example.com:80"
   * \`--host\`: the host, such as "www.example.com"
-  * \`--tld``: the TLD a.ka. top level domain, such as "com"
+  * \`--tld\`: the host top level domain, such as "com"
   * \`--port\`: the port, such as "80"
-  * \`--path\`: the path part, such as "/a/b/c/index.html?key=val#123"
+  * \`--path\`: the path, such as "/a/b/c/index.html?key=val#123"
   * \`--dirname\`: the path directory name, such as "/a/b/c"
   * \`--basename\`: the path base name, such as "index.html"
-  * \`--query\`: the query part, such as "key=val"
-  * \`--fragment\`, \`--anchor\`: the fragment a.k.a. anchor, such as an id.
+  * \`--query\`: the query, such as "key=val"
+  * \`--fragment\`, \`--anchor\`: the fragment a.k.a. anchor, such as an id
+  * \`--defragment\` \`--unanchor\`: the entire URI except the fragment a.k.a. anchor
   * \`--hierarchy\`: the hierarchical part, which is the authority and path
   * \`--holarchy\`: the non-hierarchical part, which is the query and fragment
-  * \`--connection\`: the connection URI, "http://alice:secret@www.example.com:80"
+  * \`--connection\`: the connection URI, such as "http://alice:secret@www.example.com:80"
   * \`--favicon\`: the probable favicon URL, such as "http://www.example.com/favicon.ico"
 
 ## URI Scheme Details ##
@@ -84,28 +85,45 @@ Example with more parts:
            └───────────────────────────────┬────────────────────────────┘ └───────┬────────┘
                                         hierarchy                              holarchy
 
+The host part may have a top level domain part:
+
+                 host
+           ┌──────┴──────┐
+    http://www.example.com
+                       └┬┘
+                       tld
+
 The path part may have a directory name and a base name:
 
+                                  path
+                          ┌────────┴─────────┐
     http://www.example.com/aa/bb/cc/index.html
                           └───┬───┘ └───┬────┘
                             dirname  basename
-                          └─────────┬────────┘
-                                   path
 
-The path part may have a directory name and a base name:
+The \`--connection\` option gets the scheme and authority, and is typically suitable for making a network connection:
 
     http://www.example.com/aa/bb/cc/index.html
     └─────────┬──────────┘
           connection
 
+The \`--favicon\` option transforms the URI by using the connection part then appending the typical file name \`favicon.ico\`:
+
+    http://www.example.com/favicon.ico
+    └────────────────┬───────────────┘
+                   favicon
+
+The \`--defragment\` option transforms the URI by deleting any fragment part and hash character:
+
+    http://www.example.com/example.html#identifier
+                                       └────┬────┘
+                                        defragment deletes this
+
 Synonyms:
 
   * scheme, protocol
-  * fragment, fragment id, anchor, anchor name
-
-The \`--favicon\` option transforms the URL by using the connection part then appending the typical file name \`favicon.ico\`:
-
-    http://www.example.com/favicon.ico
+  * fragment, anchor
+  * defragment, unanchor
 
 Command: $program_command
 Version: $program_version
@@ -162,11 +180,13 @@ while [ $# -gt 0 ]; do
         --basename | \
         --query | \
         --fragment | \
+        --defragment | \
         --anchor | \
+        --unanchor | \
         --hierarchy | \
         --holarchy | \
         --connection | \
-        --favicon )
+        --favicon ) \
             parts="$parts ${1#--}"
             ;;
         -?*)
@@ -181,6 +201,22 @@ done
 [ $# -eq 0 ] && help && exit 0
 
 ## Main ##
+
+tld(){
+    out ${host##*.}
+}
+
+connection(){
+    out "$scheme://$authority"
+}
+
+favicon(){
+    out "$(connection)/favicon.ico"
+}
+
+defragment(){
+    out ${uri%%#*}
+}
 
 for uri in "$@"; do
 
@@ -202,8 +238,6 @@ for uri in "$@"; do
   fragment=""
   hierarchy=""
   holarchy=""
-  connection=""
-  favicon=""
 
   ## Parse the URI to its parts ##
 
@@ -228,15 +262,10 @@ for uri in "$@"; do
           fi
           if [ -n "$hostinfo" ]; then
               host=${hostinfo%:*}
-              if [[ -n $host ]]; then
-                  tld=${host##*.}
-              fi
               if [[ $hostinfo == *:* ]]; then
                   port=${hostinfo##*:}
               fi
           fi
-          connection="$scheme://$authority"
-          favicon="$connection/favicon.ico"
       fi
       if [ -n "${path_query_fragment:-}" ]; then
           path=${path_query_fragment}
@@ -262,48 +291,48 @@ for uri in "$@"; do
   if [ -z "$parts" ];  then
       [ -z "$uri" ]          || out "uri:$uri"
       [ -z "$scheme" ]       || out "scheme:$scheme"
-      [ -z "$authority" ]    || out "authority:$authority"
       [ -z "$userinfo" ]     || out "userinfo:$userinfo"
       [ -z "$username" ]     || out "username:$username"
       [ -z "$password" ]     || out "password:$password"
       [ -z "$hostinfo" ]     || out "hostinfo:$hostinfo"
       [ -z "$host" ]         || out "host:$host"
-      [ -z "$tld" ]          || out "tld:$tld"
+      [ -z "$tld" ]          || out "tld:$(tld)"
       [ -z "$port" ]         || out "port:$port"
       [ -z "$path" ]         || out "path:$path"
       [ -z "$dirname" ]      || out "dirname:$dirname"
       [ -z "$basename" ]     || out "basename:$basename"
       [ -z "$query" ]        || out "query:$query"
       [ -z "$fragment" ]     || out "fragment:$fragment"
+      [ -z "$defragment" ]   || out "defragment:$(defragment)"
       [ -z "$hierarchy" ]    || out "hierarchy:$hierarchy"
       [ -z "$holarchy" ]     || out "holarchy:$holarchy"
-      [ -z "$connection" ]   || out "connection:$connection"
-      [ -z "$favicon" ]      || out "favicon:$favicon"
+      [ -z "$connection" ]   || out "connection:$(connection)"
+      [ -z "$favicon" ]      || out "favicon:$(favicon)"
   else
       s=""
       for part in $parts; do
           case $part in
-              uri )          s="$s$fs$uri" ;;
-              scheme )       s="$s$fs$scheme" ;;
-              protocol )     s="$s$fs$scheme" ;;
-              authority )    s="$s$fs$authority" ;;
-              userinfo )     s="$s$fs$userinfo" ;;
-              username )     s="$s$fs$username" ;;
-              password )     s="$s$fs$password" ;;
-              hostinfo )     s="$s$fs$hostinfo" ;;
-              host )         s="$s$fs$host" ;;
-              tld )          s="$s$fs$tld" ;;
-              port )         s="$s$fs$port" ;;
-              path )         s="$s$fs$path" ;;
-              dirname )      s="$s$fs$dirname" ;;
-              basename )     s="$s$fs$basename" ;;
-              query )        s="$s$fs$query" ;;
-              fragment )     s="$s$fs$fragment" ;;
-              anchor )       s="$s$fs$fragment" ;;
-              hierarchy )    s="$s$fs$hierarchy" ;;
-              holarchy )     s="$s$fs$holarchy" ;;
-              connection )   s="$s$fs$connection" ;;
-              favicon )      s="$s$fs$favicon" ;;
+              uri )                   s="$s$fs$uri" ;;
+              scheme | protocol )     s="$s$fs$scheme" ;;
+              protocol )              s="$s$fs$scheme" ;;
+              authority )             s="$s$fs$authority" ;;
+              userinfo )              s="$s$fs$userinfo" ;;
+              username )              s="$s$fs$username" ;;
+              password )              s="$s$fs$password" ;;
+              hostinfo )              s="$s$fs$hostinfo" ;;
+              host )                  s="$s$fs$host" ;;
+              tld )                   s="$s$fs$(tld)" ;;
+              port )                  s="$s$fs$port" ;;
+              path )                  s="$s$fs$path" ;;
+              dirname )               s="$s$fs$dirname" ;;
+              basename )              s="$s$fs$basename" ;;
+              query )                 s="$s$fs$query" ;;
+              fragment | anchor)      s="$s$fs$fragment" ;;
+              defragment | unanchor ) s="$s$fs$(defragment)" ;;
+              hierarchy )             s="$s$fs$hierarchy" ;;
+              holarchy )              s="$s$fs$holarchy" ;;
+              connection )            s="$s$fs$(connection)" ;;
+              favicon )               s="$s$fs$(favicon)" ;;
           esac
       done
       s=${s#$fs}

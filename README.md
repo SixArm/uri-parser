@@ -22,27 +22,33 @@ General options:
 Output options:
 
   * `--uri`: the entire URI
-  * `--scheme`: the scheme part, such as "http"
-  * `--authority`: the authority part, such as "alice:secret@www.example.com:80"
+  * `--scheme`, `--protocol`: the scheme a.k.a. protocol, such as "http"
+  * `--authority`: the authority, such as "alice:secret@www.example.com:80"
   * `--userinfo`: the username and password, such as "alice:secret"
   * `--username`: the username, such as "alice"
   * `--password`: the password, such as "secret"
   * `--hostinfo`: the host and port, such as "www.example.com:80"
   * `--host`: the host, such as "www.example.com"
   * `--port`: the port, such as "80"
-  * `--path`: the path part, such as "/a/b/c/index.html?key=val#123"
+  * `--path`: the path, such as "/a/b/c/index.html?key=val#123"
   * `--dirname`: the path directory name, such as "/a/b/c"
   * `--basename`: the path base name, such as "index.html"
-  * `--query`: the query part, such as "key=val"
-  * `--fragment`: the fragment part, such as "123"
-  * `--hierarchy`: the authority and path
-  * `--holarchy`: the query and fragment
-
-## Scheme Details ##
+  * `--query`: the query, such as "key=val"
+  * `--fragment`, `--anchor`: the fragment a.k.a. anchor, such as an id
+  * `--hierarchy`: the hierarchical part, which is the authority and path
+  * `--holarchy`: the non-hierarchical part, which is the query and fragment
+  * `--tld`: the TLD a.ka. top level domain, such as "com"
+  * `--connection`: the connection URI, such as "http://alice:secret@www.example.com:80"
+  * `--favicon`: the probable favicon URL, such as "http://www.example.com/favicon.ico"
+  * `--defragment`: the entire URI except the fragment
 
 ## URI Scheme Details ##
 
-Every URI is made of parts. The parts are described in the URI RFC specification, and there is a summary at http://en.wikipedia.org/wiki/URI_scheme
+Every URI is made of parts.
+
+  * The parts are described in the URI RFC specification.
+  * There is a summary at http://en.wikipedia.org/wiki/URI_scheme
+  * This script adds some custom part names, such as "dirname" and "basename".
 
 Example:
 
@@ -62,19 +68,41 @@ Example with more parts:
            └───────────────────────────────┬────────────────────────────┘ └───────┬────────┘
                                         hierarchy                              holarchy
 
+The host part may have a top level domain part:
+
+                 host
+           ┌──────┴──────┐
+    http://www.example.com
+                       └┬┘
+                       tld
+
 The path part may have a directory name and a base name:
 
+                                  path
+                          ┌────────┴─────────┐
     http://www.example.com/aa/bb/cc/index.html
                           └───┬───┘ └───┬────┘
                             dirname  basename
-                          └─────────┬────────┘
-                                   path
 
+The `--defragment` option transforms the URI by deleting any fragment part and hash character:
 
-## Caution ##
+    http://www.example.com/example.html#identifier
+                                       └────┬────┘
+                                        defragment deletes this
 
-This software is currently alpha quality.
+The `--connection` option gets the scheme and authority, and is typically suitable for making a network connection:
 
-It is suitable for a first look by developers so we can feedback and make improvements.
+    http://www.example.com/aa/bb/cc/index.html
+    └─────────┬──────────┘
+          connection
 
-Do not use this current version for production systems.
+The `--favicon` option transforms the URI by using the connection part then appending the typical file name `favicon.ico`:
+
+    http://www.example.com/favicon.ico
+    └────────────────┬───────────────┘
+                   favicon
+
+Synonyms:
+
+  * scheme, protocol
+  * fragment, fragment id, anchor, anchor name
