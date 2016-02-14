@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# uri-parser-test
+# uri parser test
 #
 ##
 
@@ -26,6 +26,9 @@ uri="http://alice:secret@www.example.com:80/aa/bb/cc?key=val#frag"
 x=$($cmd --scheme "$uri") &&
     assert_eq "http" "$x" "scheme"
 
+x=$($cmd --protocol "$uri") &&
+    assert_eq "http" "$x" "protocol"
+
 x=$($cmd --authority "$uri") &&
     assert_eq "alice:secret@www.example.com:80" "$x" "authority"
 
@@ -44,6 +47,9 @@ x=$($cmd --hostinfo "$uri") &&
 x=$($cmd --host "$uri") &&
     assert_eq "www.example.com" "$x" "host"
 
+x=$($cmd --tld "$uri") &&
+    assert_eq "com" "$x" "host"
+
 x=$($cmd --port "$uri") &&
     assert_eq "80" "$x" "port"
 
@@ -61,6 +67,9 @@ x=$($cmd --query "$uri") &&
 
 x=$($cmd --fragment "$uri") &&
     assert_eq "frag" "$x" "fragment"
+
+x=$($cmd --anchor "$uri") &&
+    assert_eq "frag" "$x" "anchor"
 
 x=$($cmd --hierarchy "$uri") &&
     assert_eq "alice:secret@www.example.com:80/aa/bb/cc" "$x" "hierarchy"

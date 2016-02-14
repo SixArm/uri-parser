@@ -3,9 +3,9 @@
 ## Program Tracking ##
 
 program_command="uri-parser"
-program_version="3.0.0"
+program_version="3.2.0"
 program_created="2015-05-31"
-program_updated="2016-02-12"
+program_updated="2016-02-13"
 program_license="GPL"
 program_contact="Joel Parker Henderson (joel@joelparkerhenderson.com)"
 program_variant="$program_command version $program_version updated $program_updated"
@@ -39,19 +39,20 @@ General options:
 Output options:
 
   * \`--uri\`: the entire URI
-  * \`--scheme\`: the scheme part, such as "http"
-  * \`--authority\`: the authority part, such as "alice:secret@www.example.com:80"
+  * \`--scheme\`, \`--protocol\`: the scheme a.k.a. protocol, such as "http"
+  * \`--authority\`: the authority, such as "alice:secret@www.example.com:80"
   * \`--userinfo\`: the username and password, such as "alice:secret"
   * \`--username\`: the username, such as "alice"
   * \`--password\`: the password, such as "secret"
   * \`--hostinfo\`: the host and port, such as "www.example.com:80"
   * \`--host\`: the host, such as "www.example.com"
+  * \`--tld``: the TLD a.ka. top level domain, such as "com"
   * \`--port\`: the port, such as "80"
   * \`--path\`: the path part, such as "/a/b/c/index.html?key=val#123"
   * \`--dirname\`: the path directory name, such as "/a/b/c"
   * \`--basename\`: the path base name, such as "index.html"
   * \`--query\`: the query part, such as "key=val"
-  * \`--fragment\`: the fragment part, such as "123"
+  * \`--fragment\`, \`--anchor\`: the fragment a.k.a. anchor, such as an id.
   * \`--hierarchy\`: the hierarchical part, which is the authority and path
   * \`--holarchy\`: the non-hierarchical part, which is the query and fragment
 
@@ -84,6 +85,11 @@ The path part may have a directory name and a base name:
                             dirname  basename
                           └─────────┬────────┘
                                    path
+
+Synonyms:
+
+  * scheme, protocol
+  * fragment, anchor
 
 ## Caution ##
 
@@ -133,6 +139,7 @@ while [ $# -gt 0 ]; do
             ;;
         --uri | \
         --scheme | \
+        --protocol | \
         --hierarchical | \
         --authority | \
         --userinfo | \
@@ -140,12 +147,14 @@ while [ $# -gt 0 ]; do
         --password | \
         --hostinfo | \
         --host | \
+        --tld | \
         --port | \
         --path | \
         --dirname | \
         --basename | \
         --query | \
         --fragment | \
+        --anchor | \
         --hierarchy | \
         --holarchy )
             parts="$parts ${1#--}"
@@ -168,20 +177,21 @@ for uri in "$@"; do
   ## Clear ##
 
   name=""
-  hierarchy=""
-  holarchy=""
   authority=""
   userinfo=""
-  hostinfo=""
   username=""
   password=""
+  hostinfo=""
   host=""
+  tld=""
   port=""
   path=""
   dirname=""
   basename=""
   query=""
   fragment=""
+  hierarchy=""
+  holarchy=""
 
   ## Parse the URI to its parts ##
 
@@ -206,6 +216,9 @@ for uri in "$@"; do
           fi
           if [ -n "$hostinfo" ]; then
               host=${hostinfo%:*}
+              if [[ -n $host ]]; then
+                  tld=${host##*.}
+              fi
               if [[ $hostinfo == *:* ]]; then
                   port=${hostinfo##*:}
               fi
@@ -237,10 +250,11 @@ for uri in "$@"; do
       [ -z "$scheme" ]       || out "scheme:$scheme"
       [ -z "$authority" ]    || out "authority:$authority"
       [ -z "$userinfo" ]     || out "userinfo:$userinfo"
-      [ -z "$hostinfo" ]     || out "hostinfo:$hostinfo"
       [ -z "$username" ]     || out "username:$username"
       [ -z "$password" ]     || out "password:$password"
+      [ -z "$hostinfo" ]     || out "hostinfo:$hostinfo"
       [ -z "$host" ]         || out "host:$host"
+      [ -z "$tld" ]          || out "tld:$tld"
       [ -z "$port" ]         || out "port:$port"
       [ -z "$path" ]         || out "path:$path"
       [ -z "$dirname" ]      || out "dirname:$dirname"
@@ -255,18 +269,21 @@ for uri in "$@"; do
           case $part in
               uri )          s="$s$fs$uri" ;;
               scheme )       s="$s$fs$scheme" ;;
+              protocol )     s="$s$fs$scheme" ;;
               authority )    s="$s$fs$authority" ;;
               userinfo )     s="$s$fs$userinfo" ;;
-              hostinfo )     s="$s$fs$hostinfo" ;;
               username )     s="$s$fs$username" ;;
               password )     s="$s$fs$password" ;;
+              hostinfo )     s="$s$fs$hostinfo" ;;
               host )         s="$s$fs$host" ;;
+              tld )          s="$s$fs$tld" ;;
               port )         s="$s$fs$port" ;;
               path )         s="$s$fs$path" ;;
               dirname )      s="$s$fs$dirname" ;;
               basename )     s="$s$fs$basename" ;;
               query )        s="$s$fs$query" ;;
               fragment )     s="$s$fs$fragment" ;;
+              anchor )       s="$s$fs$fragment" ;;
               hierarchy )    s="$s$fs$hierarchy" ;;
               holarchy )     s="$s$fs$holarchy" ;;
           esac
