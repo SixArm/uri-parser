@@ -3,7 +3,7 @@
 ## Program Tracking ##
 
 program_command="uri-parser"
-program_version="3.2.0"
+program_version="3.3.0"
 program_created="2015-05-31"
 program_updated="2016-02-13"
 program_license="GPL"
@@ -55,10 +55,15 @@ Output options:
   * \`--fragment\`, \`--anchor\`: the fragment a.k.a. anchor, such as an id.
   * \`--hierarchy\`: the hierarchical part, which is the authority and path
   * \`--holarchy\`: the non-hierarchical part, which is the query and fragment
+  * \`--favicon\`: the probable favicon URL, such as "http://www.example.com/favicon.ico"
 
 ## URI Scheme Details ##
 
-Every URI is made of parts. The parts are described in the URI RFC specification, and there is a summary at http://en.wikipedia.org/wiki/URI_scheme
+Every URI is made of parts.
+
+  * The parts are described in the URI RFC specification.
+  * There is a summary at http://en.wikipedia.org/wiki/URI_scheme
+  * This script adds some custom part names, such as "dirname" and "basename".
 
 Example:
 
@@ -90,6 +95,10 @@ Synonyms:
 
   * scheme, protocol
   * fragment, anchor
+
+## Extras ##
+
+* T
 
 ## Caution ##
 
@@ -156,7 +165,8 @@ while [ $# -gt 0 ]; do
         --fragment | \
         --anchor | \
         --hierarchy | \
-        --holarchy )
+        --holarchy | \
+        --favicon )
             parts="$parts ${1#--}"
             ;;
         -?*)
@@ -192,6 +202,7 @@ for uri in "$@"; do
   fragment=""
   hierarchy=""
   holarchy=""
+  favicon=""
 
   ## Parse the URI to its parts ##
 
@@ -223,6 +234,7 @@ for uri in "$@"; do
                   port=${hostinfo##*:}
               fi
           fi
+          favicon="$scheme://$authority/favicon.ico"
       fi
       if [ -n "${path_query_fragment:-}" ]; then
           path=${path_query_fragment}
@@ -263,6 +275,7 @@ for uri in "$@"; do
       [ -z "$fragment" ]     || out "fragment:$fragment"
       [ -z "$hierarchy" ]    || out "hierarchy:$hierarchy"
       [ -z "$holarchy" ]     || out "holarchy:$holarchy"
+      [ -z "$favicon" ]      || out "favicon:$favicon"
   else
       s=""
       for part in $parts; do
@@ -286,6 +299,7 @@ for uri in "$@"; do
               anchor )       s="$s$fs$fragment" ;;
               hierarchy )    s="$s$fs$hierarchy" ;;
               holarchy )     s="$s$fs$holarchy" ;;
+              favicon )      s="$s$fs$favicon" ;;
           esac
       done
       s=${s#$fs}
